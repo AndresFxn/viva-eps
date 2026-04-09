@@ -28,7 +28,12 @@ class PatientController extends Controller
 
     public function show(Patient $patient)
     {
-        return $patient->load('triageRecords.nurse', 'triageRecords.consultation');
+        return $patient->load([
+            'triageRecords.nurse',
+            'triageRecords.history.changedBy',
+            'triageRecords.consultation.doctor',
+            'triageRecords.consultation.room',
+        ]);
     }
 
     public function update(Request $request, Patient $patient)

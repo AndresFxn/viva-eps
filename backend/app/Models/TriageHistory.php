@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class TriageHistory extends Model
 {
+    protected $table = 'triage_history';
+
     protected $fillable = ['triage_record_id', 'changed_by', 'previous_level', 'new_level', 'reason'];
 
     public function triageRecord() { return $this->belongsTo(TriageRecord::class); }

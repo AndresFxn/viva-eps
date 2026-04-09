@@ -11,6 +11,7 @@ import Patients from './pages/Patients'
 import Consultations from './pages/Consultations'
 import Rooms from './pages/Rooms'
 import Reports from './pages/Reports'
+import PatientDetail from './pages/PatientDetail'
 
 const queryClient = new QueryClient()
 
@@ -27,13 +28,16 @@ function AppRoutes() {
         <ProtectedRoute><Layout><Queue /></Layout></ProtectedRoute>
       } />
       <Route path="/triage/new" element={
-        <ProtectedRoute roles={['admin', 'nurse']}><Layout><NewTriage /></Layout></ProtectedRoute>
+        <ProtectedRoute roles={['admin', 'nurse', 'doctor']}><Layout><NewTriage /></Layout></ProtectedRoute>
       } />
       <Route path="/triage/:id" element={
         <ProtectedRoute><Layout><TriageDetail /></Layout></ProtectedRoute>
       } />
       <Route path="/patients" element={
         <ProtectedRoute><Layout><Patients /></Layout></ProtectedRoute>
+      } />
+      <Route path="/patients/:id" element={
+        <ProtectedRoute><Layout><PatientDetail /></Layout></ProtectedRoute>
       } />
       <Route path="/consultations" element={
         <ProtectedRoute roles={['admin', 'doctor']}><Layout><Consultations /></Layout></ProtectedRoute>

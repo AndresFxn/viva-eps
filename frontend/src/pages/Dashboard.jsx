@@ -11,9 +11,12 @@ const TYPE_META = {
   uci:         { icon: '🫀', label: 'UCI' },
 }
 
-function StatCard({ label, value, color, icon, sub }) {
+function StatCard({ label, value, color, icon, sub, onClick, active }) {
   return (
-    <div className={`rounded-2xl p-5 text-white ${color} shadow-sm`}>
+    <div
+      onClick={onClick}
+      className={`rounded-2xl p-5 text-white ${color} shadow-sm transition-all ${onClick ? 'cursor-pointer hover:scale-105 hover:shadow-md' : ''} ${active ? 'ring-4 ring-white/40' : ''}`}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium opacity-80">{label}</p>
@@ -69,10 +72,10 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="En espera"       value={stats.waiting}        color="bg-amber-500"   icon="⏳" sub="pacientes en cola" />
-        <StatCard label="En atención"     value={stats.in_attention}   color="bg-blue-600"    icon="🩺" sub="siendo atendidos" />
-        <StatCard label="Atendidos hoy"   value={stats.attended_today} color="bg-emerald-600" icon="✓"  sub="este turno" />
-        <StatCard label="Críticos"        value={stats.critical}       color="bg-red-600"     icon="⚠" sub="nivel rojo" />
+        <StatCard label="En espera"     value={stats.waiting}        color="bg-amber-500"   icon="⏳" sub="pacientes en cola" onClick={() => setQueueFilter('todos')}  active={queueFilter === 'todos'} />
+        <StatCard label="En atención"   value={stats.in_attention}   color="bg-blue-600"    icon="🩺" sub="siendo atendidos" />
+        <StatCard label="Atendidos hoy" value={stats.attended_today} color="bg-emerald-600" icon="✓"  sub="este turno" />
+        <StatCard label="Críticos"      value={stats.critical}       color="bg-red-600"     icon="⚠" sub="nivel rojo"       onClick={() => setQueueFilter('1')}      active={queueFilter === '1'} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">

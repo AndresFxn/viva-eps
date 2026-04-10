@@ -1,6 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import api from '../lib/axios'
 import TriageBadge from '../components/TriageBadge'
+
+const TYPE_META = {
+  consultorio: { icon: '🏥', label: 'Consultorio' },
+  urgencias:   { icon: '🚨', label: 'Urgencias' },
+  trauma:      { icon: '🩹', label: 'Trauma' },
+  quirofano:   { icon: '🔪', label: 'Quirófano' },
+  uci:         { icon: '🫀', label: 'UCI' },
+}
 
 function StatCard({ label, value, color, icon, sub }) {
   return (
@@ -18,6 +27,8 @@ function StatCard({ label, value, color, icon, sub }) {
 }
 
 export default function Dashboard() {
+  const [roomFilter, setRoomFilter] = useState('todos')
+
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => api.get('/dashboard').then((r) => r.data),
@@ -35,6 +46,8 @@ export default function Dashboard() {
   )
 
   const { stats, queue, in_attention, rooms } = data
+  const roomTypes = ['todos', ...new Set(rooms.map(r => r.type))]
+  const filteredRooms = roomFilter === 'todos' ? rooms : rooms.filter(r => r.type === roomFilter)
 
   return (
     <div className="space-y-6">
@@ -116,9 +129,29 @@ export default function Dashboard() {
 
       {/* Salas */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <h3 className="font-semibold text-gray-800 mb-4">Estado de salas</h3>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <h3 className="font-semibold text-gray-800">Estado de salas</h3>
+          <div className="flex gap-2 flex-wrap">
+            {roomTypes.map((t) => (
+              <button
+                key={t}
+                onClick={() => setRoomFilter(t)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition capitalize ${
+                  roomFilter === t
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {t === 'todos' ? 'Todas' : (TYPE_META[t]?.label ?? t)}
+                <span className="ml-1 opacity-70">
+                  ({t === 'todos' ? rooms.length : rooms.filter(r => r.type === t).length})
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {rooms.map((room) => (
+          {filteredRooms.map((room) => (
             <div
               key={room.id}
               className={`rounded-xl p-4 border-2 transition ${
@@ -128,13 +161,13 @@ export default function Dashboard() {
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className={`w-2.5 h-2.5 rounded-full ${room.is_available ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                <span className="text-lg">{TYPE_META[room.type]?.icon ?? '🏥'}</span>
                 <span className={`text-xs font-semibold ${room.is_available ? 'text-emerald-600' : 'text-red-600'}`}>
                   {room.is_available ? 'Libre' : 'Ocupada'}
                 </span>
               </div>
               <p className="font-semibold text-sm text-gray-800">{room.name}</p>
-              <p className="text-xs text-gray-400 capitalize">{room.type}</p>
+              <p className="text-xs text-gray-400 capitalize">{TYPE_META[room.type]?.label ?? room.type}</p>
               {room.doctor && <p className="text-xs text-gray-500 mt-1 truncate">{room.doctor.name}</p>}
             </div>
           ))}

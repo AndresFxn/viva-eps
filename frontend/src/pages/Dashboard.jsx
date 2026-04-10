@@ -28,6 +28,7 @@ function StatCard({ label, value, color, icon, sub }) {
 
 export default function Dashboard() {
   const [roomFilter, setRoomFilter] = useState('todos')
+  const [queueFilter, setQueueFilter] = useState('todos')
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
@@ -48,6 +49,10 @@ export default function Dashboard() {
   const { stats, queue, in_attention, rooms } = data
   const roomTypes = ['todos', ...new Set(rooms.map(r => r.type))]
   const filteredRooms = roomFilter === 'todos' ? rooms : rooms.filter(r => r.type === roomFilter)
+  const filteredQueue = queueFilter === 'todos' ? queue : queue.filter(r => r.triage_level === Number(queueFilter))
+
+  const LEVEL_COLORS = { 1: 'bg-red-500', 2: 'bg-orange-500', 3: 'bg-yellow-400', 4: 'bg-emerald-500', 5: 'bg-blue-400' }
+  const LEVEL_LABELS = { 1: 'N1', 2: 'N2', 3: 'N3', 4: 'N4', 5: 'N5' }
 
   return (
     <div className="space-y-6">
@@ -73,15 +78,28 @@ export default function Dashboard() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Cola de espera */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-800">Cola de espera</h3>
-            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{queue.length} pacientes</span>
+          <div className="px-5 py-4 border-b border-gray-50">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-800">Cola de espera</h3>
+              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{filteredQueue.length} pacientes</span>
+            </div>
+            <div className="flex gap-1.5 flex-wrap">
+              {['todos', '1', '2', '3', '4', '5'].map((l) => (
+                <button key={l} onClick={() => setQueueFilter(l)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition ${
+                    queueFilter === l ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}>
+                  {l === 'todos' ? 'Todos' : LEVEL_LABELS[l]}
+                  {l !== 'todos' && <span className="ml-1 opacity-60">({queue.filter(r => r.triage_level === Number(l)).length})</span>}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="divide-y divide-gray-50">
-            {queue.length === 0 ? (
+          <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
+            {filteredQueue.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-10">No hay pacientes en espera</p>
             ) : (
-              queue.map((r, i) => (
+              filteredQueue.map((r, i) => (
                 <div key={r.id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition">
                   <div className="flex items-center gap-3">
                     <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-500 text-xs flex items-center justify-center font-medium">
@@ -107,7 +125,7 @@ export default function Dashboard() {
             <h3 className="font-semibold text-gray-800">En atención ahora</h3>
             <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{in_attention.length} activos</span>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
             {in_attention.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-10">Ningún paciente en atención</p>
             ) : (

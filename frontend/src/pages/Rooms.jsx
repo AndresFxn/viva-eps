@@ -2,12 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import api from '../lib/axios'
 
-const TYPE_ICONS = { consultorio: '🏥', urgencias: '🚨', trauma: '🩹' }
+const TYPE_META = {
+  consultorio: { icon: '🏥', label: 'Consultorio' },
+  urgencias:   { icon: '🚨', label: 'Urgencias' },
+  trauma:      { icon: '🩹', label: 'Trauma' },
+  quirofano:   { icon: '🔪', label: 'Quirófano' },
+  uci:         { icon: '🫀', label: 'UCI' },
+}
+
+const FILTERS = ['todos', 'consultorio', 'urgencias', 'trauma', 'quirofano', 'uci']
 
 export default function Rooms() {
   const qc = useQueryClient()
   const [form, setForm] = useState({ name: '', type: 'consultorio', assigned_doctor_id: '' })
   const [showForm, setShowForm] = useState(false)
+  const [filter, setFilter] = useState('todos')
 
   const { data: rooms = [], isLoading } = useQuery({
     queryKey: ['rooms'],
@@ -23,10 +32,18 @@ export default function Rooms() {
     },
   })
 
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, is_available }) => api.patch(`/rooms/${id}`, { is_available }),
+    onSuccess: () => qc.invalidateQueries(['rooms']),
+  })
+
   const deleteMutation = useMutation({
     mutationFn: (id) => api.delete(`/rooms/${id}`),
     onSuccess: () => qc.invalidateQueries(['rooms']),
   })
+
+  const filtered = filter === 'todos' ? rooms : rooms.filter((r) => r.type === filter)
+  const available = rooms.filter((r) => r.is_available).length
 
   if (isLoading) return <div className="flex items-center justify-center h-48 text-gray-400 text-sm">Cargando salas...</div>
 
@@ -35,7 +52,7 @@ export default function Rooms() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Salas y consultorios</h2>
-          <p className="text-sm text-gray-400 mt-0.5">{rooms.length} salas registradas</p>
+          <p className="text-sm text-gray-400 mt-0.5">{available} disponibles de {rooms.length} salas</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -43,6 +60,28 @@ export default function Rooms() {
         >
           <span className="text-lg leading-none">+</span> Nueva sala
         </button>
+      </div>
+
+      {/* Filtros por tipo */}
+      <div className="flex gap-2 flex-wrap">
+        {FILTERS.map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition capitalize ${
+              filter === f
+                ? 'bg-blue-600 text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-300'
+            }`}
+          >
+            {f === 'todos' ? 'Todos' : TYPE_META[f]?.label ?? f}
+            {f !== 'todos' && (
+              <span className="ml-1 opacity-70">
+                ({rooms.filter((r) => r.type === f).length})
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
       {showForm && (
@@ -54,7 +93,7 @@ export default function Rooms() {
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Ej: Consultorio 3"
+                placeholder="Ej: Quirófano 4"
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -65,9 +104,9 @@ export default function Rooms() {
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="consultorio">Consultorio</option>
-                <option value="urgencias">Urgencias</option>
-                <option value="trauma">Trauma</option>
+                {Object.entries(TYPE_META).map(([val, { label }]) => (
+                  <option key={val} value={val}>{label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -87,7 +126,7 @@ export default function Rooms() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {rooms.map((room) => (
+        {filtered.map((room) => (
           <div
             key={room.id}
             className={`bg-white rounded-2xl border-2 shadow-sm p-5 transition ${
@@ -95,15 +134,20 @@ export default function Rooms() {
             }`}
           >
             <div className="flex items-start justify-between mb-3">
-              <span className="text-2xl">{TYPE_ICONS[room.type] || '🏥'}</span>
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                room.is_available ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-              }`}>
+              <span className="text-2xl">{TYPE_META[room.type]?.icon ?? '🏥'}</span>
+              <button
+                onClick={() => toggleMutation.mutate({ id: room.id, is_available: !room.is_available })}
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full cursor-pointer transition ${
+                  room.is_available
+                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                    : 'bg-red-100 text-red-700 hover:bg-red-200'
+                }`}
+              >
                 {room.is_available ? 'Disponible' : 'Ocupada'}
-              </span>
+              </button>
             </div>
             <p className="font-bold text-gray-800">{room.name}</p>
-            <p className="text-xs text-gray-400 capitalize mt-0.5">{room.type}</p>
+            <p className="text-xs text-gray-400 capitalize mt-0.5">{TYPE_META[room.type]?.label ?? room.type}</p>
             {room.doctor && (
               <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
                 <span>👨‍⚕️</span> {room.doctor.name}

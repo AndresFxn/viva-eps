@@ -19,8 +19,8 @@ const LEVEL_COLORS = {
 
 export default function Reports() {
   const today = new Date().toISOString().split('T')[0]
-  const [from, setFrom] = useState(today + 'T00:00:00')
-  const [to, setTo]     = useState(today + 'T23:59:59')
+  const [from, setFrom] = useState(today + 'T00:00')
+  const [to, setTo]     = useState(today + 'T23:59')
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['reports', from, to],

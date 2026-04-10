@@ -16,7 +16,7 @@ class RoomController extends Controller
     {
         $data = $request->validate([
             'name'               => 'required|string|max:100',
-            'type'               => 'required|in:consultorio,urgencias,trauma',
+            'type'               => 'required|in:consultorio,urgencias,trauma,quirofano,uci',
             'assigned_doctor_id' => 'nullable|exists:users,id',
         ]);
 
@@ -32,7 +32,7 @@ class RoomController extends Controller
     {
         $data = $request->validate([
             'name'               => 'sometimes|string|max:100',
-            'type'               => 'sometimes|in:consultorio,urgencias,trauma',
+            'type'               => 'sometimes|in:consultorio,urgencias,trauma,quirofano,uci',
             'is_available'       => 'sometimes|boolean',
             'assigned_doctor_id' => 'nullable|exists:users,id',
         ]);

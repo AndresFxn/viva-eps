@@ -177,6 +177,23 @@ class DatabaseSeeder extends Seeder
                     'treatment'        => 'Manejo farmacológico y seguimiento ambulatorio indicado.',
                 ]);
             }
+
+            // Consulta activa para los en atención (sala ocupada)
+            if ($p[12] === 'in_attention') {
+                $room = $rooms->where('is_available', true)->first();
+                if ($room) {
+                    $room->update(['is_available' => false]);
+                    Consultation::create([
+                        'triage_record_id' => $triage->id,
+                        'doctor_id'        => $room->assigned_doctor_id ?? $doctors->random()->id,
+                        'room_id'          => $room->id,
+                        'started_at'       => $attendedAt,
+                        'ended_at'         => null,
+                        'diagnosis'        => null,
+                        'treatment'        => null,
+                    ]);
+                }
+            }
         }
     }
 }

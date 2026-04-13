@@ -14,10 +14,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── ADMIN ──────────────────────────────────────────────
         User::create(['name' => 'Administrador', 'email' => 'admin@triage.com', 'password' => Hash::make('password'), 'role' => 'admin']);
 
-        // ── DOCTORES ───────────────────────────────────────────
         $doctors = collect([
             ['Dr. Carlos Pérez',          'doctor1@triage.com'],
             ['Dra. Ana Gómez',            'doctor2@triage.com'],
@@ -41,7 +39,6 @@ class DatabaseSeeder extends Seeder
             ['Dra. Ximena Pedraza',       'doctor20@triage.com'],
         ])->map(fn($d) => User::create(['name' => $d[0], 'email' => $d[1], 'password' => Hash::make('password'), 'role' => 'doctor']));
 
-        // ── ENFERMEROS ─────────────────────────────────────────
         $nurses = collect([
             ['Enf. Luis Torres',       'nurse1@triage.com'],
             ['Enf. María Castillo',    'nurse2@triage.com'],
@@ -52,7 +49,6 @@ class DatabaseSeeder extends Seeder
             ['Enf. Andrés Nieto',      'nurse7@triage.com'],
         ])->map(fn($n) => User::create(['name' => $n[0], 'email' => $n[1], 'password' => Hash::make('password'), 'role' => 'nurse']));
 
-        // ── SALAS ──────────────────────────────────────────────
         $rooms = collect([
             ['Consultorio 1',           'consultorio', $doctors[0]->id],
             ['Consultorio 2',           'consultorio', $doctors[1]->id],
@@ -76,9 +72,7 @@ class DatabaseSeeder extends Seeder
             ['UCI',                     'urgencias',   $doctors[16]->id],
         ])->map(fn($r) => Room::create(['name' => $r[0], 'type' => $r[1], 'assigned_doctor_id' => $r[2]]));
 
-        // ── PACIENTES ──────────────────────────────────────────
         $patientsData = [
-            // Nivel 1 - Crítico (rojo)
             ['Juan Pablo Moreno',       '10234567', 45, 'M', '3001234567', 'Dolor torácico irradiado al brazo izquierdo, diaforesis, posible IAM',                    1, 115, 165, 102, 37.8, 90, 'waiting',     120],
             ['María Fernanda López',    '20345678', 32, 'F', '3012345678', 'Convulsiones tónico-clónicas generalizadas, pérdida de consciencia',                      1, 132, 182, 112, 38.6, 87, 'waiting',     95],
             ['Roberto Salinas',         '31234567', 67, 'M', '3021234567', 'ACV isquémico, hemiplejia derecha, afasia motora',                                        1, 98,  195, 118, 37.2, 92, 'waiting',     40],
@@ -86,7 +80,6 @@ class DatabaseSeeder extends Seeder
             ['Ernesto Palomino',        '51111111', 72, 'M', '3041111111', 'Paro cardiorrespiratorio recuperado, arritmia ventricular',                               1, 42,  70,  40,  36.2, 82, 'in_attention',10],
             ['Sofía Bermúdez',          '61111111', 24, 'F', '3051111111', 'Intoxicación por benzodiacepinas, Glasgow 8, bradipnea',                                  1, 52,  90,  55,  36.8, 88, 'in_attention',20],
 
-            // Nivel 2 - Emergencia (naranja)
             ['Carlos Andrés Ruiz',      '30456789', 58, 'M', '3023456789', 'Fractura expuesta tibia derecha, accidente de tránsito, sangrado activo',                 2, 96,  142, 91,  37.3, 96, 'waiting',     75],
             ['Ana Lucía Vargas',        '40567890', 27, 'F', '3034567890', 'Quemaduras segundo grado en brazos y tórax, 20% superficie corporal',                    2, 104, 132, 86,  38.2, 94, 'waiting',     60],
             ['Pedro José Salcedo',      '50678901', 63, 'M', '3045678901', 'Dolor abdominal severo fosa ilíaca derecha, fiebre, posible apendicitis',                 2, 90,  128, 82,  38.9, 97, 'waiting',     90],
@@ -96,7 +89,6 @@ class DatabaseSeeder extends Seeder
             ['Tomás Guerrero',          '71111111', 48, 'M', '3071111111', 'Trauma craneoencefálico moderado, pérdida de consciencia 5 min, vómito',                 2, 88,  145, 92,  37.5, 95, 'waiting',     45],
             ['Valentina Ospina',        '81111111', 31, 'F', '3081111111', 'Neumotórax espontáneo, dolor pleurítico, disnea progresiva',                              2, 118, 105, 68,  37.1, 91, 'waiting',     30],
 
-            // Nivel 3 - Urgente (amarillo)
             ['Luis Eduardo Castro',     '70890123', 41, 'M', '3067890123', 'Esguince grado II tobillo derecho, dolor moderado, leve edema periarticular',            3, 79,  122, 79,  36.8, 98, 'waiting',     110],
             ['Valentina Cruz',          '80901234', 35, 'F', '3078901234', 'Infección urinaria complicada, fiebre 38°C, disuria intensa, escalofríos',               3, 84,  116, 73,  38.0, 99, 'waiting',     100],
             ['Hernando Mejía',          '91012345', 70, 'M', '3089012345', 'Crisis hipertensiva, cefalea intensa, visión borrosa, PA 158/97',                        3, 70,  158, 97,  36.5, 97, 'waiting',     130],
@@ -108,7 +100,6 @@ class DatabaseSeeder extends Seeder
             ['Felipe Cardona',          '11111112', 26, 'M', '3111111112', 'Fractura de clavícula derecha, caída de bicicleta, dolor intenso',                       3, 82,  125, 80,  36.9, 98, 'waiting',     80],
             ['Daniela Ríos',            '12111111', 22, 'F', '3121111111', 'Reacción alérgica moderada, urticaria generalizada, prurito intenso',                    3, 90,  112, 70,  37.2, 98, 'waiting',     65],
 
-            // Nivel 4 - Menos urgente (verde)
             ['Camila Ortega',           '11123456', 24, 'F', '3090123456', 'Faringoamigdalitis, odinofagia intensa, fiebre leve 37.8°C',                             4, 75,  113, 71,  37.8, 99, 'waiting',     150],
             ['Ricardo Pinto',           '12234567', 30, 'M', '3101234567', 'Herida cortante superficial mano derecha, requiere sutura, sangrado controlado',         4, 77,  119, 75,  36.7, 99, 'waiting',     140],
             ['Alejandro Ríos',          '13456789', 22, 'M', '3111234567', 'Contusión rodilla izquierda, dolor leve, sin deformidad ni inestabilidad',               4, 72,  115, 72,  36.6, 99, 'waiting',     160],
@@ -118,14 +109,12 @@ class DatabaseSeeder extends Seeder
             ['Samuel Peña',             '14111111', 17, 'M', '3141111111', 'Esguince de muñeca derecha, caída jugando fútbol, dolor moderado',                       4, 76,  114, 72,  36.6, 99, 'waiting',     155],
             ['Natalia Gómez',           '15111111', 33, 'F', '3151111111', 'Dolor dental agudo, absceso periapical, fiebre leve',                                    4, 80,  118, 74,  37.5, 99, 'waiting',     165],
 
-            // Nivel 5 - No urgente (azul)
             ['Gloria Inés Suárez',      '13345678', 52, 'F', '3112345678', 'Control rutina, renovación fórmula médica para hipertensión arterial',                   5, 72,  130, 82,  36.6, 99, 'waiting',     200],
             ['Ernesto Palacio',         '16789012', 60, 'M', '3141234567', 'Revisión resultados laboratorio, paciente diabético estable',                            5, 70,  128, 80,  36.5, 99, 'waiting',     210],
             ['Pilar Echeverri',         '17890123', 45, 'F', '3151234567', 'Solicitud incapacidad médica, resfriado común leve, sin fiebre',                         5, 74,  110, 68,  37.1, 99, 'waiting',     220],
             ['Jorge Esteban Rueda',     '16111111', 38, 'M', '3161111111', 'Revisión de herida postquirúrgica, cicatrización normal',                                5, 72,  115, 72,  36.7, 99, 'waiting',     230],
             ['Amparo Villegas',         '17111111', 55, 'F', '3171111111', 'Solicitud de exámenes preventivos, paciente asintomática',                               5, 70,  120, 76,  36.6, 99, 'waiting',     240],
 
-            // Pacientes ya atendidos (attended)
             ['Rodrigo Castaño',         '18111111', 53, 'M', '3181111111', 'Infarto agudo de miocardio, trombolisis exitosa, estable',                               1, 88,  130, 85,  37.0, 96, 'attended',    300],
             ['Liliana Montoya',         '19111111', 44, 'F', '3191111111', 'Apendicitis aguda, llevada a cirugía, evolución satisfactoria',                          2, 82,  118, 74,  36.8, 98, 'attended',    280],
             ['Andrés Felipe Torres',    '20111111', 29, 'M', '3201111111', 'Fractura de radio distal, reducción e inmovilización, alta con analgesia',               3, 76,  120, 76,  36.7, 99, 'attended',    260],
@@ -165,7 +154,6 @@ class DatabaseSeeder extends Seeder
                 'attended_at'        => $attendedAt,
             ]);
 
-            // Crear consulta para los atendidos
             if ($p[12] === 'attended') {
                 Consultation::create([
                     'triage_record_id' => $triage->id,
@@ -178,7 +166,6 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
 
-            // Consulta activa para los en atención (sala ocupada)
             if ($p[12] === 'in_attention') {
                 $room = Room::where('is_available', true)->first();
                 if ($room) {

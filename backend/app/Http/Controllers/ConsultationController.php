@@ -24,7 +24,6 @@ class ConsultationController extends Controller
             'room_id'          => 'required|exists:rooms,id',
         ]);
 
-        // Marcar sala como ocupada y triage como en atención
         Room::where('id', $data['room_id'])->update(['is_available' => false]);
         TriageRecord::where('id', $data['triage_record_id'])->update([
             'status'      => 'in_attention',
@@ -42,7 +41,6 @@ class ConsultationController extends Controller
         return $consultation->load('triageRecord.patient', 'doctor', 'room');
     }
 
-    // Finalizar consulta
     public function finish(Request $request, Consultation $consultation)
     {
         $data = $request->validate([
@@ -56,7 +54,6 @@ class ConsultationController extends Controller
             'treatment' => $data['treatment'],
         ]);
 
-        // Liberar sala y marcar triage como atendido
         Room::where('id', $consultation->room_id)->update(['is_available' => true]);
         TriageRecord::where('id', $consultation->triage_record_id)->update(['status' => 'attended']);
 

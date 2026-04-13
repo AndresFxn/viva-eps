@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class TriageController extends Controller
 {
-    // Cola de prioridad: waiting ordenados por score dinámico
     public function index()
     {
         $records = TriageRecord::with('patient', 'nurse')
@@ -47,7 +46,6 @@ class TriageController extends Controller
         return $triageRecord->load('patient', 'nurse', 'consultation.doctor', 'consultation.room', 'history.changedBy');
     }
 
-    // Reclasificación: cambia nivel y registra en historial
     public function reclassify(Request $request, TriageRecord $triageRecord)
     {
         $data = $request->validate([
@@ -68,7 +66,6 @@ class TriageController extends Controller
         return response()->json($triageRecord->fresh()->load('history.changedBy'));
     }
 
-    // Cambiar estado del paciente
     public function updateStatus(Request $request, TriageRecord $triageRecord)
     {
         $data = $request->validate([

@@ -10,22 +10,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Cola de espera ordenada por prioridad
         $queue = TriageRecord::with('patient', 'nurse')
             ->where('status', 'waiting')
             ->get()
             ->sortByDesc('priority_score')
             ->values();
 
-        // En atención ahora
         $inAttention = TriageRecord::with('patient', 'consultation.doctor', 'consultation.room')
             ->where('status', 'in_attention')
             ->get();
 
-        // Salas disponibles
         $rooms = Room::with('doctor')->get();
 
-        // Conteos del día
         $today = now()->startOfDay();
         $stats = [
             'waiting'      => $queue->count(),

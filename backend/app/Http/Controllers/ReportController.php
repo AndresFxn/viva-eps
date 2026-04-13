@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
-    // Reporte agregado: estadísticas por turno/día
     public function summary(Request $request)
     {
         $from = $request->query('from', now()->startOfDay());
@@ -46,7 +45,6 @@ class ReportController extends Controller
         ]);
     }
 
-    // Historial de reclasificaciones
     public function reclassifications(Request $request)
     {
         $from = $request->query('from', now()->startOfDay());

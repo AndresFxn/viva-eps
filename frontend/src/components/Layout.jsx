@@ -9,6 +9,7 @@ const navLinks = [
   { to: '/triage/new',    label: 'Nuevo Triage',   icon: '+',  roles: ['admin', 'nurse', 'doctor'] },
   { to: '/consultations', label: 'Consultas',      icon: '🩺', roles: ['admin', 'doctor'] },
   { to: '/rooms',         label: 'Salas',          icon: '🚪', roles: ['admin'] },
+  { to: '/users',         label: 'Personal',       icon: '👥', roles: ['admin'] },
   { to: '/reports',       label: 'Reportes',       icon: '📊', roles: ['admin', 'doctor'] },
 ]
 

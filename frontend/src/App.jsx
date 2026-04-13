@@ -12,6 +12,7 @@ import Consultations from './pages/Consultations'
 import Rooms from './pages/Rooms'
 import Reports from './pages/Reports'
 import PatientDetail from './pages/PatientDetail'
+import Users from './pages/Users'
 
 const queryClient = new QueryClient()
 
@@ -44,6 +45,9 @@ function AppRoutes() {
       } />
       <Route path="/rooms" element={
         <ProtectedRoute roles={['admin']}><Layout><Rooms /></Layout></ProtectedRoute>
+      } />
+      <Route path="/users" element={
+        <ProtectedRoute roles={['admin']}><Layout><Users /></Layout></ProtectedRoute>
       } />
       <Route path="/reports" element={
         <ProtectedRoute roles={['admin', 'doctor']}><Layout><Reports /></Layout></ProtectedRoute>

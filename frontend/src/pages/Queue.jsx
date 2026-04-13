@@ -11,6 +11,7 @@ export default function Queue() {
   const user = useAuthStore((s) => s.user)
   const qc = useQueryClient()
   const [reclassify, setReclassify] = useState(null)
+  const [attend, setAttend] = useState(null) // { triageId, room_id, doctor_id }
   const [filterLevel, setFilterLevel] = useState('todos')
   const [search, setSearch] = useState('')
 
@@ -18,6 +19,11 @@ export default function Queue() {
     queryKey: ['queue'],
     queryFn: () => api.get('/triage').then((r) => r.data),
     refetchInterval: 10000,
+  })
+
+  const { data: rooms = [] } = useQuery({
+    queryKey: ['rooms'],
+    queryFn: () => api.get('/rooms').then((r) => r.data),
   })
 
   const reclassifyMutation = useMutation({
@@ -30,16 +36,20 @@ export default function Queue() {
     },
   })
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }) => api.patch(`/triage/${id}/status`, { status }),
+  const attendMutation = useMutation({
+    mutationFn: (data) => api.post('/consultations', data),
     onSuccess: () => {
       qc.invalidateQueries(['queue'])
       qc.invalidateQueries(['dashboard'])
+      qc.invalidateQueries(['rooms'])
+      setAttend(null)
     },
   })
 
   const canTriage = ['admin', 'nurse', 'doctor'].includes(user?.role)
   const canAttend = ['admin', 'doctor'].includes(user?.role)
+
+  const availableRooms = rooms.filter((r) => r.is_available)
 
   const filtered = useMemo(() => queue.filter((r) => {
     const matchLevel = filterLevel === 'todos' || r.triage_level === Number(filterLevel)
@@ -138,7 +148,7 @@ export default function Queue() {
                       )}
                       {canAttend && (
                         <button
-                          onClick={() => statusMutation.mutate({ id: r.id, status: 'in_attention' })}
+                          onClick={() => setAttend({ triageId: r.id, room_id: '', doctor_id: '' })}
                           className="text-emerald-500 hover:text-emerald-700 text-xs font-medium"
                         >
                           Atender
@@ -150,6 +160,46 @@ export default function Queue() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {attend && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">Asignar a consulta</h3>
+              <p className="text-sm text-gray-400 mt-0.5">Selecciona sala y doctor para atender al paciente</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Sala disponible</label>
+              <select
+                value={attend.room_id}
+                onChange={(e) => {
+                  const room = availableRooms.find((r) => r.id === Number(e.target.value))
+                  setAttend({ ...attend, room_id: e.target.value, doctor_id: room?.assigned_doctor_id || '' })
+                }}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Seleccionar sala...</option>
+                {availableRooms.map((r) => (
+                  <option key={r.id} value={r.id}>{r.name} {r.doctor ? `— ${r.doctor.name}` : '— Sin doctor'}</option>
+                ))}
+              </select>
+              {availableRooms.length === 0 && <p className="text-xs text-red-500 mt-1">No hay salas disponibles</p>}
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => setAttend(null)} className="flex-1 px-4 py-2.5 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 transition font-medium">
+                Cancelar
+              </button>
+              <button
+                onClick={() => attendMutation.mutate({ triage_record_id: attend.triageId, room_id: Number(attend.room_id), doctor_id: Number(attend.doctor_id) })}
+                disabled={!attend.room_id || !attend.doctor_id || attendMutation.isPending}
+                className="flex-1 px-4 py-2.5 text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition font-medium disabled:opacity-50"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

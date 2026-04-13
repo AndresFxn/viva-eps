@@ -8,6 +8,7 @@ use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 
 // Autenticación pública
 Route::post('/register', [AuthController::class, 'register']);
@@ -39,6 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Salas (solo admin)
     Route::apiResource('rooms', RoomController::class);
+
+    // Usuarios: médicos y enfermeros (solo admin)
+    Route::get('/users',           [UserController::class, 'index']);
+    Route::post('/users',          [UserController::class, 'store']);
+    Route::patch('/users/{user}',  [UserController::class, 'update']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
     // Reportes (solo admin/doctor)
     Route::get('/reports/summary',           [ReportController::class, 'summary']);

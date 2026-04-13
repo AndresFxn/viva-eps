@@ -180,7 +180,7 @@ class DatabaseSeeder extends Seeder
 
             // Consulta activa para los en atención (sala ocupada)
             if ($p[12] === 'in_attention') {
-                $room = $rooms->where('is_available', true)->first();
+                $room = Room::where('is_available', true)->first();
                 if ($room) {
                     $room->update(['is_available' => false]);
                     Consultation::create([
